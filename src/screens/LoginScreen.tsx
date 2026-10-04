@@ -1,0 +1,10 @@
+import { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput } from 'react-native';
+import { Screen } from '../components/Screen'; import { Button, Card, Muted, Title } from '../components/UI'; import { useAuth } from '../contexts/AuthContext'; import { getApiUrl } from '../services/api'; import { colors } from '../theme';
+export function LoginScreen() {
+  const { signIn } = useAuth(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [url, setUrl] = useState(''); const [busy, setBusy] = useState(false);
+  useEffect(() => { getApiUrl().then(setUrl); }, []);
+  const submit = async () => { if (!email || !password || !url) return Alert.alert('Preencha todos os campos'); setBusy(true); try { await signIn(email.trim(), password, url.trim()); } catch (e) { Alert.alert('Não foi possível entrar', e instanceof Error ? e.message : 'Erro desconhecido'); } finally { setBusy(false); } };
+  return <Screen><Text style={styles.brand}>ZENITH OS</Text><Title>Súmula offline</Title><Muted>Entre enquanto estiver conectado. Depois do download da partida, toda a operação funciona sem internet.</Muted><Card><Text style={styles.label}>Endereço da API</Text><TextInput autoCapitalize="none" value={url} onChangeText={setUrl} placeholder="http://192.168.1.10:3000" placeholderTextColor={colors.muted} style={styles.input}/><Text style={styles.label}>E-mail</Text><TextInput autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} style={styles.input}/><Text style={styles.label}>Senha</Text><TextInput secureTextEntry value={password} onChangeText={setPassword} style={styles.input}/><Button label={busy ? 'Entrando…' : 'Entrar'} disabled={busy} onPress={submit}/></Card><Muted>No celular físico, use o IP do computador na rede Wi-Fi. No emulador Android, use 10.0.2.2.</Muted></Screen>;
+}
+const styles = StyleSheet.create({ brand: { color: colors.success, fontWeight: '900', letterSpacing: 2 }, label: { color: colors.text, fontWeight: '700' }, input: { color: colors.text, backgroundColor: colors.surfaceRaised, borderRadius: 10, padding: 12 } });

@@ -60,7 +60,14 @@ export async function updateRoster(entry: RosterEntry, patch: Partial<Pick<Roste
       await Promise.all(team.map(row => row.update(r => { r.captain = false; })));
     }
     await entry.update(r => { if (patch.confirmed !== undefined) { r.confirmed = patch.confirmed; r.checkedInAt = patch.confirmed ? Date.now() : undefined; } if (patch.starter !== undefined) r.starter = patch.starter; if (patch.captain !== undefined) r.captain = patch.captain; if (patch.shirtNumber !== undefined) r.shirtNumber = patch.shirtNumber; });
-    await enqueue(entry.matchId, 'roster', 'upsert', { id: entry.id, ...patch, timestamp: Date.now() });
+    await enqueue(entry.matchId, 'roster', 'upsert', {
+      id: entry.id, athleteId: entry.athleteId, clubId: entry.clubId,
+      shirtNumber: patch.shirtNumber ?? entry.shirtNumber,
+      confirmed: patch.confirmed ?? entry.confirmed,
+      eligible: entry.eligible, eligibilityNote: entry.eligibilityNote,
+      starter: patch.starter ?? entry.starter, captain: patch.captain ?? entry.captain,
+      timestamp: Date.now(),
+    });
   });
 }
 
@@ -96,14 +103,17 @@ export async function addEvent(input: EventInput) {
       r.relatedAthleteId = relatedAthlete?.athleteId; r.relatedAthleteName = relatedAthlete?.athleteName; r.eventType = type; r.eventDetail = detail;
       r.period = match.currentPeriod; r.minute = Math.floor(seconds / 60); r.second = seconds % 60; r.sequence = sequence; r.occurredAt = Date.now(); r.cancelled = false;
     });
-    if (type === 'GOL') await match.update(r => { if (clubId === match.homeClubId) r.homeScore += 1; else r.awayScore += 1; });
+    if (type === 'GOL') await match.update(r => {
+      const scoringClub = detail === 'CONTRA' ? (clubId === match.homeClubId ? match.awayClubId : match.homeClubId) : clubId;
+      if (scoringClub === match.homeClubId) r.homeScore += 1; else r.awayScore += 1;
+    });
     await enqueue(match.id, 'event', 'create', { id: event.id, type, detail, clubId, athleteId: event.athleteId, relatedAthleteId: event.relatedAthleteId, period: event.period, minute: event.minute, second: event.second, sequence });
     if (type === 'CARTAO_AMARELO' && athlete) {
       const athleteId = getAthleteId(athlete)!;
       const yellows = await database.get<MatchEvent>('match_events').query(Q.where('match_id', match.id), Q.where('athlete_id', athleteId), Q.where('event_type', 'CARTAO_AMARELO'), Q.where('cancelled', false)).fetchCount();
       if (shouldAutoExpel(yellows)) {
         const red = await database.get<MatchEvent>('match_events').create(r => { r.matchId = match.id; r.clubId = clubId; r.athleteId = athleteId; r.athleteName = athlete.athleteName ?? athlete.name; r.eventType = 'CARTAO_VERMELHO'; r.eventDetail = 'Expulsão automática por segundo amarelo'; r.period = match.currentPeriod; r.minute = Math.floor(seconds / 60); r.second = seconds % 60; r.sequence = sequence + 1; r.occurredAt = Date.now(); r.cancelled = false; });
-        await enqueue(match.id, 'event', 'create', { id: red.id, type: red.eventType, automatic: true, athleteId, sequence: red.sequence });
+        await enqueue(match.id, 'event', 'create', { id: red.id, type: red.eventType, detail: red.eventDetail, automatic: true, clubId, athleteId, period: red.period, minute: red.minute, second: red.second, sequence: red.sequence });
       }
     }
   });

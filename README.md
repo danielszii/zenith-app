@@ -59,7 +59,9 @@ Em outro terminal:
 npm run android
 ```
 
-Para aparelho físico, configure `API_URL` em `src/services/sync.ts` com o IP local do computador. `10.0.2.2` funciona no emulador Android.
+Na tela de login, informe o endereço da API. Em aparelho físico use o IP local do computador, por exemplo `http://192.168.1.10:3000`. `http://10.0.2.2:3000` funciona no emulador Android.
+
+O JWT é armazenado no Keychain/Keystore nativo. Depois do login, o aplicativo lista apenas partidas atribuídas ao mesário e baixa o pacote completo para o SQLite.
 
 ## Qualidade
 
