@@ -19,3 +19,14 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// WatermelonDB 0.28 references BuildConfig.DEBUG in its Android bridge, while
+// recent Android Gradle Plugin versions no longer generate BuildConfig for
+// library modules unless they explicitly opt in.
+subprojects { subproject ->
+    subproject.plugins.withId("com.android.library") {
+        if (subproject.name == "nozbe_watermelondb") {
+            subproject.android.buildFeatures.buildConfig = true
+        }
+    }
+}
