@@ -18,4 +18,14 @@ export function PostGameScreen({ route, navigation }: Props) {
     <Button label={match.status === 'encerrado' ? 'Súmula já encerrada' : 'Fechar súmula definitivamente'} tone="danger" disabled={post.length < roles.length || match.status === 'encerrado'} onPress={finish}/>
   </Screen>;
 }
-const styles = StyleSheet.create({ heading: { color: colors.text, fontSize: 17, fontWeight: '800' }, row: { flexDirection: 'row', justifyContent: 'space-between' }, value: { color: colors.text, fontWeight: '900' }, wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 }, pill: { padding: 9, borderRadius: 8, backgroundColor: colors.surfaceRaised }, active: { borderWidth: 1, borderColor: colors.primary }, pillText: { color: colors.text, fontSize: 9, fontWeight: '800' }, input: { color: colors.text, backgroundColor: colors.surfaceRaised, padding: 12, borderRadius: 10 }, signed: { color: colors.success, fontSize: 12 } });
+const styles = StyleSheet.create({
+  heading: { color: colors.text, fontSize: 18, fontWeight: '900', letterSpacing: -0.3 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
+  value: { color: colors.text, fontWeight: '900' },
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  pill: { paddingHorizontal: 10, paddingVertical: 9, borderRadius: 6, backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.borderSoft },
+  active: { borderColor: colors.primary, backgroundColor: '#182312' },
+  pillText: { color: colors.text, fontSize: 9, fontWeight: '900', letterSpacing: 0.4 },
+  input: { color: colors.text, backgroundColor: colors.surfaceSoft, padding: 13, borderRadius: 6, borderWidth: 1, borderColor: colors.border },
+  signed: { color: colors.success, fontSize: 12, fontWeight: '700' },
+});

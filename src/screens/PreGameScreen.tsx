@@ -21,4 +21,25 @@ export function PreGameScreen({ route, navigation }: Props) {
     <Card><Text style={styles.heading}>Prontidão</Text><Muted>{readiness.confirmed} atletas confirmados · {readiness.blocked} impedido(s) · {readiness.signed}/4 assinaturas</Muted><Button label="Ir para operação ao vivo" disabled={!readiness.confirmed || readiness.signed < 4} onPress={() => navigation.replace('LiveMatch', { matchId: match.id })}/></Card>
   </Screen>;
 }
-const styles = StyleSheet.create({ tabs: { flexDirection: 'row', gap: 7, flexWrap: 'wrap' }, tab: { padding: 10, borderRadius: 10, backgroundColor: colors.surfaceRaised }, activeTab: { borderWidth: 1, borderColor: colors.primary }, tabText: { color: colors.text, fontSize: 11, fontWeight: '800' }, heading: { color: colors.text, fontSize: 17, fontWeight: '800' }, row: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderColor: colors.border, paddingTop: 9 }, name: { color: colors.text, fontWeight: '700' }, role: { color: colors.muted, fontSize: 11 }, ok: { color: colors.success, fontSize: 12 }, danger: { color: colors.danger, fontSize: 12 }, player: { gap: 9, paddingVertical: 8, borderTopWidth: 1, borderColor: colors.border }, blocked: { opacity: .55 }, playerInfo: { gap: 3 }, chips: { flexDirection: 'row', gap: 5, flexWrap: 'wrap' }, chip: { paddingHorizontal: 9, paddingVertical: 7, borderRadius: 8, backgroundColor: colors.surfaceRaised }, chipText: { color: colors.text, fontSize: 9, fontWeight: '800' }, green: { backgroundColor: '#176445' }, blue: { backgroundColor: '#245686' }, yellow: { backgroundColor: '#795D0B' }, input: { color: colors.text, backgroundColor: colors.surfaceRaised, padding: 12, borderRadius: 10 } });
+const styles = StyleSheet.create({
+  tabs: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  tab: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 6, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderSoft },
+  activeTab: { borderColor: colors.primary, backgroundColor: '#182312' },
+  tabText: { color: colors.text, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 },
+  heading: { color: colors.text, fontSize: 18, fontWeight: '900', letterSpacing: -0.3 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderColor: colors.borderSoft, paddingTop: 11 },
+  name: { color: colors.text, fontWeight: '800' },
+  role: { color: colors.muted, fontSize: 11 },
+  ok: { color: colors.success, fontSize: 12, fontWeight: '700' },
+  danger: { color: colors.danger, fontSize: 12, fontWeight: '700' },
+  player: { gap: 10, paddingVertical: 11, borderTopWidth: 1, borderColor: colors.borderSoft },
+  blocked: { opacity: 0.45 },
+  playerInfo: { gap: 3 },
+  chips: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  chip: { paddingHorizontal: 10, paddingVertical: 8, borderRadius: 6, backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.borderSoft },
+  chipText: { color: colors.text, fontSize: 9, fontWeight: '900', letterSpacing: 0.4 },
+  green: { backgroundColor: '#10251B', borderColor: colors.success },
+  blue: { backgroundColor: '#182312', borderColor: colors.primary },
+  yellow: { backgroundColor: '#2A2311', borderColor: colors.warning },
+  input: { color: colors.text, backgroundColor: colors.surfaceSoft, padding: 13, borderRadius: 6, borderWidth: 1, borderColor: colors.border },
+});

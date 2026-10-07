@@ -23,4 +23,4 @@ export function SignaturePad({ onSave }: { onSave: (pathData: string) => void })
     <View style={styles.actions}><Button label="Limpar" tone="secondary" onPress={() => setStrokes([])} /><Button label="Salvar assinatura" disabled={!strokes.length} onPress={() => onSave(serialized)} /></View>
   </View>;
 }
-const styles = StyleSheet.create({ wrap: { gap: 10 }, pad: { height: 190, backgroundColor: '#fff', borderRadius: 14, overflow: 'hidden' }, hint: { position: 'absolute', alignSelf: 'center', top: 80, color: '#777' }, actions: { gap: 8 } });
+const styles = StyleSheet.create({ wrap: { gap: 10 }, pad: { height: 190, backgroundColor: '#F4F7F5', borderRadius: 8, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }, hint: { position: 'absolute', alignSelf: 'center', top: 80, color: '#657068', fontSize: 12, fontWeight: '700' }, actions: { gap: 8 } });

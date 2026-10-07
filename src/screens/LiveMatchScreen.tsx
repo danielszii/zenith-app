@@ -29,4 +29,25 @@ export function LiveMatchScreen({ route, navigation }: Props) {
     <Button label="Encerrar operação e assinar" tone="danger" onPress={async () => { if (match.clockRunning) await controlClock(match, 'pause'); navigation.navigate('PostGame', { matchId: match.id }); }}/>
   </Screen>;
 }
-const styles = StyleSheet.create({ score: { flexDirection: 'row', alignItems: 'center', gap: 10 }, team: { color: colors.text, flex: 1, fontWeight: '800' }, right: { textAlign: 'right' }, clockRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, clock: { color: colors.text, fontSize: 44, fontWeight: '900', fontVariant: ['tabular-nums'] }, clockActions: { gap: 6 }, heading: { color: colors.text, fontSize: 17, fontWeight: '800' }, wrap: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' }, pill: { backgroundColor: colors.surfaceRaised, borderRadius: 9, padding: 10 }, teamButton: { flex: 1, backgroundColor: colors.surfaceRaised, borderRadius: 9, padding: 12 }, active: { borderWidth: 1, borderColor: colors.primary }, pillText: { color: colors.text, fontWeight: '700' }, small: { color: colors.text, fontSize: 10 }, label: { color: colors.muted, fontSize: 11, fontWeight: '800' }, player: { backgroundColor: colors.surfaceRaised, borderRadius: 9, padding: 11 }, selected: { borderWidth: 1, borderColor: colors.success }, playerText: { color: colors.text, fontWeight: '700' }, event: { flexDirection: 'row', gap: 10, borderTopWidth: 1, borderColor: colors.border, paddingTop: 8 }, time: { color: colors.warning, width: 42, fontWeight: '900' }, eventBody: { flex: 1 } });
+const styles = StyleSheet.create({
+  score: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
+  team: { color: colors.text, flex: 1, fontWeight: '900', fontSize: 15 },
+  right: { textAlign: 'right' },
+  clockRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  clock: { color: colors.primary, fontSize: 50, fontWeight: '900', fontVariant: ['tabular-nums'], letterSpacing: -2 },
+  clockActions: { gap: 7 },
+  heading: { color: colors.text, fontSize: 18, fontWeight: '900', letterSpacing: -0.3 },
+  wrap: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  pill: { backgroundColor: colors.surfaceRaised, borderRadius: 6, paddingHorizontal: 11, paddingVertical: 10, borderWidth: 1, borderColor: colors.borderSoft },
+  teamButton: { flex: 1, backgroundColor: colors.surfaceRaised, borderRadius: 6, padding: 13, borderWidth: 1, borderColor: colors.borderSoft },
+  active: { borderColor: colors.primary, backgroundColor: '#182312' },
+  pillText: { color: colors.text, fontWeight: '800' },
+  small: { color: colors.text, fontSize: 10, fontWeight: '800' },
+  label: { color: colors.muted, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 },
+  player: { backgroundColor: colors.surfaceRaised, borderRadius: 6, padding: 12, borderWidth: 1, borderColor: colors.borderSoft },
+  selected: { borderColor: colors.primary, backgroundColor: '#182312' },
+  playerText: { color: colors.text, fontWeight: '800' },
+  event: { flexDirection: 'row', gap: 10, borderTopWidth: 1, borderColor: colors.borderSoft, paddingTop: 10 },
+  time: { color: colors.primary, width: 42, fontWeight: '900' },
+  eventBody: { flex: 1 },
+});
