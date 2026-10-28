@@ -20,7 +20,7 @@ export function SignaturePad({ onSave }: { onSave: (pathData: string) => void })
       {!strokes.length && <Text style={styles.hint}>Assine aqui</Text>}
       <Svg width="100%" height="100%" pointerEvents="none">{paths.map((d, i) => <Path key={`${i}-${d.length}`} d={d} stroke={colors.text} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />)}</Svg>
     </View>
-    <View style={styles.actions}><Button label="Limpar" tone="secondary" onPress={() => setStrokes([])} /><Button label="Salvar assinatura" disabled={!strokes.length} onPress={() => onSave(serialized)} /></View>
+    <View style={styles.actions}><Button label="Limpar" tone="secondary" style={styles.action} onPress={() => setStrokes([])} /><Button label="Salvar assinatura" style={styles.action} disabled={!strokes.length} onPress={() => onSave(serialized)} /></View>
   </View>;
 }
-const styles = StyleSheet.create({ wrap: { gap: 10 }, pad: { height: 190, backgroundColor: '#F4F7F5', borderRadius: 8, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }, hint: { position: 'absolute', alignSelf: 'center', top: 80, color: '#657068', fontSize: 12, fontWeight: '700' }, actions: { gap: 8 } });
+const styles = StyleSheet.create({ wrap: { gap: 10 }, pad: { height: 220, backgroundColor: '#F4F7F5', borderRadius: 14, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }, hint: { position: 'absolute', alignSelf: 'center', top: 96, color: '#657068', fontSize: 12, fontWeight: '700' }, actions: { flexDirection: 'row', gap: 8 }, action: { flex: 1 } });

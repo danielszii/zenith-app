@@ -1,6 +1,6 @@
 import { Q } from '@nozbe/watermelondb';
 import { database } from '../database';
-import { Athlete, Championship, Club, Match, MatchEvent, MatchPerson, RosterEntry, Signature, SyncQueueItem } from '../database/models';
+import { Athlete, Match, MatchEvent, MatchPerson, RosterEntry, Signature, SyncQueueItem } from '../database/models';
 import { shouldAutoExpel } from '../domain/matchRules';
 
 declare module '../database/models' {
@@ -16,32 +16,6 @@ async function enqueue(matchId: string, entity: string, action: string, payload:
   await database.get<SyncQueueItem>('sync_queue').create(item => {
     item.matchId = matchId; item.operationId = operationId(); item.entity = entity; item.action = action;
     item.payload = JSON.stringify(payload); item.createdAt = Date.now(); item.attempts = 0; item.nextRetryAt = 0; item.state = 'pending';
-  });
-}
-
-export async function seedDemoData() {
-  if (await database.get<Match>('matches').query().fetchCount()) return;
-  await database.write(async () => {
-    const home = await database.get<Club>('clubs').create(r => { r.name = 'Zenith Futsal'; r.colors = 'Preto e branco'; });
-    const away = await database.get<Club>('clubs').create(r => { r.name = 'Atlético Central'; r.colors = 'Azul e branco'; });
-    const championship = await database.get<Championship>('championships').create(r => { r.name = 'Liga Zenith'; r.category = 'Adulto'; r.modality = 'Futsal'; });
-    const athletes: Athlete[] = [];
-    for (const [clubId, prefix] of [[home.id, 'Zenith'], [away.id, 'Atlético']] as const) {
-      for (let number = 1; number <= 12; number += 1) athletes.push(await database.get<Athlete>('athletes').create(a => {
-        a.clubId = clubId; a.name = `${prefix} ${number}`; a.shirtNumber = number; a.document = `BID-${clubId.slice(0, 4)}-${number}`;
-        a.status = number === 12 && clubId === away.id ? 'suspenso' : 'ativo'; a.suspensionReason = a.status === 'suspenso' ? 'Suspensão automática por cartões' : undefined;
-      }));
-    }
-    const match = await database.get<Match>('matches').create(r => {
-      r.championshipId = championship.id; r.homeClubId = home.id; r.awayClubId = away.id; r.homeName = home.name; r.awayName = away.name;
-      r.scheduledAt = Date.now() + 3600000; r.venue = 'Ginásio Zenith'; r.status = 'pre_jogo'; r.homeScore = 0; r.awayScore = 0;
-      r.currentPeriod = '1T'; r.clockSeconds = 0; r.clockRunning = false; r.downloadedAt = Date.now();
-    });
-    for (const [name, role, clubId] of [['Rafael Souza', 'ARBITRO_PRINCIPAL', undefined], ['Marina Lima', 'SEGUNDO_ARBITRO', undefined], ['Carlos Mendes', 'DELEGADO', home.id], ['João Alves', 'DELEGADO', away.id], ['Paulo Reis', 'TECNICO', home.id], ['André Melo', 'TECNICO', away.id]] as const) await database.get<MatchPerson>('match_people').create(p => { p.matchId = match.id; p.name = name; p.role = role; p.clubId = clubId; });
-    for (const athlete of athletes) await database.get<RosterEntry>('roster_entries').create(r => {
-      r.matchId = match.id; r.clubId = athlete.clubId; r.athleteId = athlete.id; r.athleteName = athlete.name; r.shirtNumber = athlete.shirtNumber;
-      r.confirmed = false; r.eligible = athlete.status === 'ativo'; r.eligibilityNote = athlete.suspensionReason; r.starter = false; r.captain = false;
-    });
   });
 }
 

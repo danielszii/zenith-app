@@ -1,31 +1,37 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Screen } from '../components/Screen'; import { Button, Card, Muted, Title } from '../components/UI'; import { SignaturePad } from '../components/SignaturePad';
-import { Match, MatchEvent, Signature } from '../database/models'; import { closeMatch, fetchEvents, fetchMatch, fetchSignatures, saveSignature } from '../services/localData'; import { RootStackParamList } from '../navigation/types'; import { colors } from '../theme';
+import { ResponsiveRow, Screen } from '../components/Screen';
+import { Badge, Button, Card, Muted, PageHeader, SectionTitle } from '../components/UI';
+import { SignaturePad } from '../components/SignaturePad';
+import { Match, MatchEvent, Signature } from '../database/models';
+import { closeMatch, fetchEvents, fetchMatch, fetchSignatures, saveSignature } from '../services/localData';
+import { RootStackParamList } from '../navigation/types';
+import { colors, radius, spacing } from '../theme';
+
 type Props = NativeStackScreenProps<RootStackParamList, 'PostGame'>;
 const roles = ['ARBITRO_PRINCIPAL', 'CAPITAO_MANDANTE', 'CAPITAO_VISITANTE', 'DELEGADO_MANDANTE', 'DELEGADO_VISITANTE'];
 export function PostGameScreen({ route, navigation }: Props) {
   const [match, setMatch] = useState<Match | null>(null); const [events, setEvents] = useState<MatchEvent[]>([]); const [signatures, setSignatures] = useState<Signature[]>([]); const [role, setRole] = useState(roles[0]); const [name, setName] = useState('');
-  const load = useCallback(async () => { setMatch(await fetchMatch(route.params.matchId)); setEvents(await fetchEvents(route.params.matchId)); setSignatures(await fetchSignatures(route.params.matchId)); }, [route.params.matchId]); useEffect(() => { load(); }, [load]);
+  const load = useCallback(async () => { setMatch(await fetchMatch(route.params.matchId)); setEvents(await fetchEvents(route.params.matchId)); setSignatures(await fetchSignatures(route.params.matchId)); }, [route.params.matchId]);
+  useEffect(() => { load(); }, [load]);
   if (!match) return <Screen><Muted>Carregando fechamento…</Muted></Screen>;
-  const post = signatures.filter(s => s.phase === 'POST');
+  const post = signatures.filter(signature => signature.phase === 'POST');
   const sign = async (data: string) => { if (!name.trim()) return Alert.alert('Informe o nome do signatário'); await saveSignature(match.id, name.trim(), role, 'POST', data); setName(''); await load(); };
   const finish = async () => { if (post.length < roles.length) return Alert.alert('Assinaturas pendentes', 'Colete todas as assinaturas obrigatórias antes de fechar.'); await closeMatch(match); Alert.alert('Súmula fechada', 'O documento está seguro no aparelho e entrou na fila de sincronização.'); navigation.popToTop(); };
-  return <Screen><Muted>CONFERÊNCIA E FECHAMENTO</Muted><Title>{match.homeScore} × {match.awayScore}</Title>
-    <Card><Text style={styles.heading}>Resumo oficial</Text><View style={styles.row}><Muted>Gols</Muted><Text style={styles.value}>{events.filter(e => e.eventType === 'GOL').length}</Text></View><View style={styles.row}><Muted>Cartões amarelos</Muted><Text style={styles.value}>{events.filter(e => e.eventType === 'CARTAO_AMARELO').length}</Text></View><View style={styles.row}><Muted>Cartões vermelhos</Muted><Text style={styles.value}>{events.filter(e => e.eventType === 'CARTAO_VERMELHO').length}</Text></View><View style={styles.row}><Muted>Substituições</Muted><Text style={styles.value}>{events.filter(e => e.eventType === 'SUBSTITUICAO').length}</Text></View><Muted>Confira os dados. Após o fechamento, correções devem seguir fluxo administrativo.</Muted></Card>
-    <Card><Text style={styles.heading}>Assinaturas pós-jogo ({post.length}/{roles.length})</Text><View style={styles.wrap}>{roles.map(r => <Pressable key={r} onPress={() => setRole(r)} style={[styles.pill, role === r && styles.active]}><Text style={styles.pillText}>{r.replaceAll('_', ' ')}</Text></Pressable>)}</View><TextInput value={name} onChangeText={setName} placeholder="Nome completo" placeholderTextColor={colors.muted} style={styles.input}/><SignaturePad onSave={sign}/>{post.map(s => <Text key={s.id} style={styles.signed}>✓ {s.signerRole.replaceAll('_', ' ')} · {s.signerName}</Text>)}</Card>
-    <Button label={match.status === 'encerrado' ? 'Súmula já encerrada' : 'Fechar súmula definitivamente'} tone="danger" disabled={post.length < roles.length || match.status === 'encerrado'} onPress={finish}/>
+  const metrics = [{ label: 'GOLS', value: events.filter(event => event.eventType === 'GOL').length }, { label: 'AMARELOS', value: events.filter(event => event.eventType === 'CARTAO_AMARELO').length }, { label: 'VERMELHOS', value: events.filter(event => event.eventType === 'CARTAO_VERMELHO').length }, { label: 'SUBSTITUIÇÕES', value: events.filter(event => event.eventType === 'SUBSTITUICAO').length }];
+
+  return <Screen>
+    <PageHeader eyebrow="Conferência oficial" title="Fechamento" description="Revise os registros e colete as assinaturas obrigatórias." action={<Badge label={`${post.length}/${roles.length} ASSINATURAS`} tone={post.length === roles.length ? 'success' : 'warning'} />} />
+    <Card accent><View style={styles.score}><Text style={styles.team}>{match.homeName}</Text><Text style={styles.scoreValue}>{match.homeScore} × {match.awayScore}</Text><Text style={[styles.team, styles.right]}>{match.awayName}</Text></View><View style={styles.metrics}>{metrics.map(metric => <View key={metric.label} style={styles.metric}><Text style={styles.metricValue}>{metric.value}</Text><Text style={styles.metricLabel}>{metric.label}</Text></View>)}</View><Muted>Confira os dados. Após o fechamento, correções devem seguir o fluxo administrativo.</Muted></Card>
+    <ResponsiveRow><Card style={styles.signature}><SectionTitle>Assinatura pós-jogo</SectionTitle><View style={styles.roles}>{roles.map(item => <Pressable key={item} onPress={() => setRole(item)} style={[styles.role, role === item && styles.roleActive]}><Text style={[styles.roleText, role === item && styles.roleTextActive]}>{item.replaceAll('_', ' ')}</Text></Pressable>)}</View><TextInput value={name} onChangeText={setName} placeholder="Nome completo" placeholderTextColor={colors.muted} style={styles.input} /><SignaturePad onSave={sign} /></Card><Card style={styles.status}><SectionTitle>Validação</SectionTitle>{roles.map(item => { const signature = post.find(value => value.signerRole === item); return <View key={item} style={styles.statusRow}><View style={styles.statusCopy}><Text style={styles.statusRole}>{item.replaceAll('_', ' ')}</Text>{signature ? <Text style={styles.signer}>{signature.signerName}</Text> : null}</View><Badge label={signature ? 'ASSINADO' : 'PENDENTE'} tone={signature ? 'success' : 'warning'} /></View>; })}</Card></ResponsiveRow>
+    <Button label={match.status === 'encerrado' ? 'Súmula já encerrada' : 'Fechar súmula definitivamente'} tone="danger" disabled={post.length < roles.length || match.status === 'encerrado'} onPress={finish} />
   </Screen>;
 }
+
 const styles = StyleSheet.create({
-  heading: { color: colors.text, fontSize: 18, fontWeight: '900', letterSpacing: -0.3 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
-  value: { color: colors.text, fontWeight: '900' },
-  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  pill: { paddingHorizontal: 10, paddingVertical: 9, borderRadius: 6, backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.borderSoft },
-  active: { borderColor: colors.primary, backgroundColor: '#182312' },
-  pillText: { color: colors.text, fontSize: 9, fontWeight: '900', letterSpacing: 0.4 },
-  input: { color: colors.text, backgroundColor: colors.surfaceSoft, padding: 13, borderRadius: 6, borderWidth: 1, borderColor: colors.border },
-  signed: { color: colors.success, fontSize: 12, fontWeight: '700' },
+  score: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 12 }, team: { flex: 1, color: colors.text, fontSize: 15, fontWeight: '900' }, right: { textAlign: 'right' }, scoreValue: { color: colors.text, fontSize: 42, fontWeight: '900' },
+  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingVertical: spacing.md, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.borderSoft }, metric: { flex: 1, minWidth: 110, alignItems: 'center', gap: 3 }, metricValue: { color: colors.primary, fontSize: 28, fontWeight: '900' }, metricLabel: { color: colors.muted, fontSize: 8, fontWeight: '900', letterSpacing: .8 },
+  signature: { flex: 1.5 }, status: { flex: 1 }, roles: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 }, role: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 10, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.borderSoft }, roleActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft }, roleText: { color: colors.muted, fontSize: 9, fontWeight: '900' }, roleTextActive: { color: colors.text },
+  input: { minHeight: 52, color: colors.text, backgroundColor: colors.surfaceSoft, paddingHorizontal: 14, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border }, statusRow: { minHeight: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, borderTopWidth: 1, borderTopColor: colors.borderSoft }, statusCopy: { flex: 1, gap: 3 }, statusRole: { color: colors.text, fontSize: 10, fontWeight: '900' }, signer: { color: colors.muted, fontSize: 10 },
 });
